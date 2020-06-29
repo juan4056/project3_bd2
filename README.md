@@ -6,11 +6,11 @@ Para la extracción de características usamos la librería face_recognition, us
 
 ## Indexación
 
-En el archivo [write.py](write.py) extrameos las características de los rostros de las fotos y las almacenamos en un archivo, para leer e imprimir dichas características podemos emplear [read.py](read.py). De esta manera no tenemos que buscar las características todo el tiempo ya que toma aproximadamente 20 minutos leer mil imágenes.
+En el archivo [write.py](app/server/write.py) extrameos las características de los rostros de las fotos y las almacenamos en un archivo, para leer e imprimir dichas características podemos emplear [read.py](app/server/read.py). De esta manera no tenemos que buscar las características todo el tiempo ya que toma aproximadamente 20 minutos leer mil imágenes.
 
 ## Búsqueda
 
-En [recognition.py](recognition.py) tenemos las siguientes funciones para realizar la búsqueda de los k veciinos más cercanos usando la distancia euclidiana y la distancia manhattan.
+En [recognition.py](app/server/recognition.py) tenemos las siguientes funciones para realizar la búsqueda de los k veciinos más cercanos usando la distancia euclidiana y la distancia manhattan.
 
 - **euclidian_distance**: Dados dos vectores de características, halla la distancia Euclidiana entre estos dos.
 - **manhattan_distance**: Dados dos vectores de características, halla la distancia Manhattan entre estos dos.
@@ -19,7 +19,7 @@ En [recognition.py](recognition.py) tenemos las siguientes funciones para realiz
 
 ### Resultados
 
-En [pruebas.py](pruebas.py) leemos las características guardadas en nuestro archivo y creamos un array con estos. Para nuestras pruebas usaremos 4 grupos de 3 personas diferentes. 
+En [pruebas.py](app/server/pruebas.py) leemos las características guardadas en nuestro archivo y creamos un array con estos. Para nuestras pruebas usaremos 4 grupos de 3 personas diferentes. 
 
 - Para k = 2: 'Valdas_Adamkus', 'Scott_McNealy', 'Adrian_Nastase'
 - Para k = 4: 'Tony_Bennett', 'Naoto_Kan', 'David_Hyde_Pierce'
@@ -38,11 +38,11 @@ Si promediamos las precisiones, tenemos que para la distancia euclidiana tenemos
 
 ## R Tree
 
-Para trabajar con el R tree usamos la librería proporcionada por [libspatialindex](https://toblerity.org/rtree/install.html#nix). Creamos un índice R tree de 128 dimensiones, y lo guardaremos en disco. Leemos el archivo de características e insertamos un objeto con el nombre de la persona en el índice tomando como coordenadas las características. En [test_rtree.py](test_rtree.py) tenemos un ejemplo. 
+Para trabajar con el R tree usamos la librería proporcionada por [libspatialindex](https://toblerity.org/rtree/install.html#nix). Creamos un índice R tree de 128 dimensiones, y lo guardaremos en disco. Leemos el archivo de características e insertamos un objeto con el nombre de la persona en el índice tomando como coordenadas las características. En [test_rtree.py](app/server/test_rtree.py) tenemos un ejemplo. 
 
 ### Resultados
 
-En [pruebas2.py](pruebas2.py) correremos nuestro knn con distancia euclidiana y el knn del R tree con diferentes tamaños de la colección (100, 200, 400, 800, 1600, 3200, 6400 y 9134). Usaremos a "Tony_Bennett" y k = 4 como parámetros. Los tiempos obtenidos son los siguientes:
+En [pruebas2.py](app/server/pruebas2.py) correremos nuestro knn con distancia euclidiana y el knn del R tree con diferentes tamaños de la colección (100, 200, 400, 800, 1600, 3200, 6400 y 9134). Usaremos a "Tony_Bennett" y k = 4 como parámetros. Los tiempos obtenidos son los siguientes:
 
 ![Test1](img/test1.png)
 
@@ -63,3 +63,16 @@ N = 9134 | 0.02349 | 0.37450
 
 Podemos observar que la construcción del R-Tree demora unos segundos para muchos datos, pero el KNN-RTree es muy superior al KNN-Secuencial.
 
+### Motor de búsqueda
+
+![Frontend](img/captura.png)
+
+En nuestro motor de búsqueda podemos subir una imagen con el botón load files, y con enviar podremos obtener las 5 imágenes más similares a la que enviamos. Antes de enviar la imagen debemos llenar el RTree, para esto usamos el botón build.
+
+En [server.py](app/server/server.py) es donde corremos nuestro frontend, usamos flask y tenemos 3 rutas:
+
+- La primera para mostrar el frontend.
+- La segunda (build) para construir y llenar nuestro RTree, previamente iniciamos el Rtree al inicio del programa.
+- La tercera (upload) es para buscar los 5 vecinos más cercanos a la foto que mandamos y retorna la dirección de estas fotos.
+
+Para nuestro motor de búsqueda hemos usado un archivo de características diferente, el cuál fue creado con [write2.py](app/server/write2.py), ya que en este guardamos la dirección completa de la imagen para luego poder mostrarla en el frontend.

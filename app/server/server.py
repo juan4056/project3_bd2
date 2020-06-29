@@ -32,7 +32,6 @@ def index():
 
 @app.route("/build", methods=['GET'])
 def build():
-    print("hla")
     global idx
 
     file = open('encodings2.bin', 'r')
